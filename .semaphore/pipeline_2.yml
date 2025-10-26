@@ -1,0 +1,25 @@
+version: v1.0
+name: Build Docker image
+agent:
+  machine:
+    type: f1-standard-2
+    os_image: ubuntu2004
+global_job_config:
+  prologue:
+    commands:
+      - checkout
+blocks:
+  - name: Build Docker Image
+    task:
+      jobs:
+        - name: Build Docker Image
+          commands:
+            - echo $DOCKER_PASSWORD | docker login --username "$DOCKER_USERNAME" --password-stdin
+            - 'docker build -t devops-project:${SEMAPHORE_WORKFLOW_ID} .'
+            - 'docker tag devops-project:${SEMAPHORE_WORKFLOW_ID} "$DOCKER_USERNAME"/devops-project'
+            - docker push "$DOCKER_USERNAME"/devops-project
+      secrets:
+        - name: Dockersecret
+promotions:
+  - name: Deploy
+    pipeline_file: pipeline_3.yml

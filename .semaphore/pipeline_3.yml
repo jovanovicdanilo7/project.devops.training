@@ -1,0 +1,25 @@
+version: v1.0
+name: Deploy
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+global_job_config:
+  prologue:
+    commands:
+      - checkout
+blocks:
+  - name: Deploy
+    task:
+      jobs:
+        - name: Deploy
+          commands:
+            - cd examples/
+            - kubectl create namespace "jovanovicdanilo" || true
+            - kubectl config set-context --current --namespace="jovanovicdanilo"
+            - kubectl apply -f deployment.yml
+            - kubectl apply -f service.yml
+            - kubectl rollout status deployment/myapp
+            - kubectl get svc myapp
+      secrets:
+        - name: kubeconfig
